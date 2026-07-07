@@ -32,6 +32,10 @@ class RecommendationControls(ctk.CTkFrame):
         self.exclude_recent_checkbox = ctk.CTkCheckBox(self, text="최근 추천 제외", variable=self.exclude_recent_var, command=self._on_exclude_recent_change)
         self.exclude_recent_checkbox.grid(row=4, column=0, padx=5, pady=2, sticky="w")
 
+        self.exclude_untiered_var = ctk.BooleanVar(value=True)
+        self.exclude_untiered_checkbox = ctk.CTkCheckBox(self, text="난이도 없는 문제 제외", variable=self.exclude_untiered_var, command=self._on_exclude_untiered_change)
+        self.exclude_untiered_checkbox.grid(row=5, column=0, padx=5, pady=2, sticky="w")
+
         self.grid_columnconfigure(1, weight=1)
 
     def _on_mode_change(self, choice):
@@ -47,4 +51,7 @@ class RecommendationControls(ctk.CTkFrame):
 
     def _on_exclude_recent_change(self):
         self.model.exclude_recent = self.exclude_recent_var.get()
+
+    def _on_exclude_untiered_change(self):
+        self.model.exclude_untiered = self.exclude_untiered_var.get()
 

@@ -62,6 +62,13 @@ class MainView(ctk.CTkFrame):
         # Show the recommend frame by default
         self.show_frame("recommend")
 
+        self.model.on_data_loaded(self._on_data_loaded)
+
+    def _on_data_loaded(self):
+        for frame in self.frames.values():
+            if hasattr(frame, 'update_all'):
+                self.after_idle(frame.update_all)
+
     def show_frame(self, frame_name):
         """Raise the specified frame to the top."""
         for frame in self.frames.values():

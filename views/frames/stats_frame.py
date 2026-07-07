@@ -121,8 +121,15 @@ class StatsFrame(ctk.CTkFrame):
     def _update_by_tier_tab(self):
         for widget in self.tier_stats_frame.winfo_children():
             widget.destroy()
-        placeholder = ctk.CTkLabel(self.tier_stats_frame, text="난이도 통계가 여기에 표시됩니다.\n(푼 문제 추적 기능 구현 필요)")
-        placeholder.grid(row=0, column=0, padx=10, pady=10)
+        problems = self.model.get_problems()
+        tier_count = {}
+        for p in problems:
+            t = p.get('tier', '') or '미분류'
+            tier_count[t] = tier_count.get(t, 0) + 1
+        sorted_tiers = sorted(tier_count.items(), key=lambda x: self.model._tier_sort_key(x[0]) if x[0] != '미분류' else (-1, 0))
+        for i, (tier, count) in enumerate(sorted_tiers):
+            label = ctk.CTkLabel(self.tier_stats_frame, text=f"{tier}: {count}문제")
+            label.grid(row=i, column=0, padx=10, pady=2, sticky="w")
 
     def _update_recent_tab(self):
         for widget in self.recent_activity_frame.winfo_children():

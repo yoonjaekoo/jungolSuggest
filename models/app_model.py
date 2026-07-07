@@ -40,6 +40,7 @@ class AppModel:
         self.exclude_solved: bool = True
         self.exclude_favorites: bool = False
         self.exclude_recent: bool = True
+        self.exclude_untiered: bool = True
         self.recent_recommendations: List[int] = []  # Stores problem numbers
 
         # Solved/favorites sets loaded from DB
@@ -49,6 +50,7 @@ class AppModel:
         # Threading control
         self._loading_thread: Optional[threading.Thread] = None
         self._stop_event = threading.Event()
+        self._data_loaded_callbacks: list = []
 
         # Initialize services (we'll create them later)
         self._initialize_services()
@@ -57,6 +59,16 @@ class AppModel:
         self.cache_service = CacheService()
         self.database_service = DatabaseService()
         self.crawler_service = CrawlerService(use_mock=False)
+
+    def on_data_loaded(self, callback):
+        self._data_loaded_callbacks.append(callback)
+
+    def _fire_data_loaded(self):
+        for cb in self._data_loaded_callbacks:
+            try:
+                cb()
+            except Exception as e:
+                self.logger.error(f"Data loaded callback error: {e}")
 
     def start_background_tasks(self):
         """Start background threads for data loading and crawling."""
@@ -120,11 +132,13 @@ class AppModel:
         for problem in data:
             if 'tags' in problem and isinstance(problem['tags'], list):
                 tags_set.update(problem['tags'])
-            if 'tier' in problem and problem['tier']:
-                tiers_set.add(problem['tier'])
+            tier = problem.get('tier') or ''
+            if tier and not tier.startswith('Tier '):
+                tiers_set.add(tier)
         self.tags = sorted(list(tags_set))
         self.tiers = sorted(list(tiers_set), key=self._tier_sort_key)
         self.logger.info(f"Model updated with {len(self.problems)} problems, {len(self.tags)} tags, {len(self.tiers)} tiers.")
+        self._fire_data_loaded()
 
     def _tier_sort_key(self, tier: str) -> tuple:
         metal_order = {"Bronze": 0, "Silver": 1, "Gold": 2, "Platinum": 3, "Diamond": 4, "Ruby": 5}
@@ -182,6 +196,8 @@ class AppModel:
             filtered = [p for p in filtered if p.get('number') not in self.solved_set]
         if self.exclude_favorites:
             filtered = [p for p in filtered if p.get('number') not in self.favorites_set]
+        if self.exclude_untiered:
+            filtered = [p for p in filtered if p.get('tier')]
         # Exclude recently recommended (if enabled)
         if self.exclude_recent:
             filtered = [p for p in filtered if p.get('number') not in self.recent_recommendations]

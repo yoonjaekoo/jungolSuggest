@@ -33,6 +33,12 @@ class RecommendFrame(ctk.CTkFrame):
         self.get_rec_button = ctk.CTkButton(self.controls_frame, text="추천 받기", command=self.get_recommendation)
         self.get_rec_button.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
 
+        self.model.on_data_loaded(self._on_data_loaded)
+
+    def _on_data_loaded(self):
+        self.after_idle(self.tag_selector.update_tags)
+        self.after_idle(self.tier_selector.update_tiers)
+
         self.display_frame = ctk.CTkFrame(self)
         self.display_frame.grid(row=1, column=0, padx=10, pady=5, sticky="nsew")
         self.display_frame.grid_columnconfigure(0, weight=1)

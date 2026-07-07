@@ -26,15 +26,25 @@ class TierSelector(ctk.CTkFrame):
 
         self.grid_columnconfigure(1, weight=1)
 
+        self._tier_update_id = None
+        self.model.on_data_loaded(self.update_tiers)
         self.update_tiers()
 
     def update_tiers(self):
+        if self._tier_update_id is not None:
+            self.after_cancel(self._tier_update_id)
+        self._tier_update_id = self.after_idle(self._do_update_tiers)
+
+    def _do_update_tiers(self):
+        self._tier_update_id = None
         tiers = self.model.get_tiers()
         if tiers:
             self.min_optionmenu.configure(values=tiers)
             self.max_optionmenu.configure(values=tiers)
-            self.min_optionmenu.set(tiers[0])
-            self.max_optionmenu.set(tiers[-1])
+            if self.min_optionmenu.get() not in tiers:
+                self.min_optionmenu.set(tiers[0])
+            if self.max_optionmenu.get() not in tiers:
+                self.max_optionmenu.set(tiers[-1])
             self._on_tier_change()
         else:
             self.min_optionmenu.configure(values=["난이도 없음"])

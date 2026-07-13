@@ -139,8 +139,8 @@ main.py → MainController (컨트롤러)
 | `customtkinter` | ≥5.2.0 | 모던 GUI 프레임워크 (다크 모드 지원) |
 | `requests` | ≥2.28.0 | HTTP 요청 (크롤링) |
 | `beautifulsoup4` | ≥4.11.0 | HTML 파싱 |
-| `playwright` | ≥1.40.0 | 브라우저 자동화 (향후 확장용) |
-| `Pillow` | ≥10.0.0 | 이미지 처리 (향후 확장용) |
+| `playwright` | ≥1.40.0 | 브라우저 자동화 (확장용) |
+| `Pillow` | ≥10.0.0 | 이미지 처리 (확장용) |
 
 ---
 
@@ -158,3 +158,40 @@ main.py → MainController (컨트롤러)
 ## 라이선스
 
 이 프로젝트는 학습 및 개인 사용 목적으로 제작되었습니다.
+
+---
+
+## 📦 실행 파일 (EXE) 배포 방법
+
+Windows에서 실행 파일을 배포하고 싶다면, PyInstaller을 사용하여 간단히 패키징할 수 있습니다.
+
+### 필수 조건
+
+- Python 3.9 이상
+- pip
+- `requirements.txt`에 나열된 모든 패키지
+
+### 설치 및 빌드
+
+1. PyInstaller 설치
+
+```bash
+pip install pyinstaller
+```
+
+2. 실행 파일 생성
+
+```bash
+pyinstaller --onefile --windowed main.py
+```
+
+- `--onefile`: 하나의 실행 파일로 묶음
+- `--windowed`: 콘솔 창 없이 GUI 실행 (선택 사항)
+
+빌드가 완료되면 `dist` 폴더 안에 `main.exe` 파일이 생성됩니다.
+
+### 배포 팁
+
+- 대상 컴퓨터에 Visual C++ Redistributable이 설치되어 있어야 합니다 (대부분의 최신 Windows에는 기본 설치되어 있음).
+- Playwright를 사용하는 경우, 실행 파일이 내부 브라우저를 포함하지 않을 수 있으므로, 대상 머신에서 `playwright install`을 별도로 실행하거나, 빌드 시 `--add-data` 옵션으로 브라우저 바이너리를 포함시키는 방법을 고려하세요.
+- 바이러스 백신에서 오탐이 발생할 수 있으니, 신뢰할 수 있는 출처에서 배포하거나 코드 사인 인증서를 사용하는 것이 좋습니다.
